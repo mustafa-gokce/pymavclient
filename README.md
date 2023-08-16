@@ -1,2 +1,2 @@
-# pymavclient
-Python RESTful API client for MAVLink enabled vehicles
+# PyMAVClient
+Just another Python client for MAVLink enabled vehicles
