@@ -286,6 +286,18 @@ class PyMAVClient:
             self.send_command_long(command=dialect.MAV_CMD_COMPONENT_ARM_DISARM,
                                    param1=1)
 
+    def wait_for_armed(self, timeout=10):
+        """
+        Wait for the vehicle to arm.
+        """
+        start_time = time.monotonic()
+        while True:
+            if time.monotonic() - start_time > timeout > 0:
+                return False
+            if self.armed:
+                return True
+            time.sleep(0.1)
+
     def disarm(self):
         """
         Disarm the vehicle.
@@ -293,6 +305,18 @@ class PyMAVClient:
         if self.wait_connected():
             self.send_command_long(command=dialect.MAV_CMD_COMPONENT_ARM_DISARM,
                                    param1=0)
+
+    def wait_for_disarmed(self, timeout=10):
+        """
+        Wait for the vehicle to disarm.
+        """
+        start_time = time.monotonic()
+        while True:
+            if time.monotonic() - start_time > timeout > 0:
+                return False
+            if self.disarmed:
+                return True
+            time.sleep(0.1)
 
     def mode_is_supported(self, mode):
         """
@@ -308,6 +332,18 @@ class PyMAVClient:
             self.send_command_long(command=dialect.MAV_CMD_DO_SET_MODE,
                                    param1=dialect.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED,
                                    param2=self.__flight_modes[mode])
+
+    def wait_for_mode(self, mode, timeout=10):
+        """
+        Wait for the vehicle to change flight mode.
+        """
+        start_time = time.monotonic()
+        while True:
+            if time.monotonic() - start_time > timeout > 0:
+                return False
+            if self.mode == mode:
+                return True
+            time.sleep(0.1)
 
     def get_rc_channel(self, channel):
         """
