@@ -1,5 +1,5 @@
-import time
 import unittest
+
 import pymavclient
 
 
@@ -21,15 +21,12 @@ class TestRC(unittest.TestCase):
 
     def test_rc(self):
         self.vehicle.set_rc_channel(channel=6, value=2000)
-        time.sleep(2)
-        self.assertEqual(first=self.vehicle.get_rc_channel(6), second=2000, msg="RC channel 6 is not set to 2000")
+        self.assertTrue(expr=self.vehicle.wait_rc_channel(channel=6, value=2000), msg="RC channel 6 is not set to 2000")
 
         self.vehicle.set_rc_channel(channel=6, value=1000)
-        time.sleep(2)
-        self.assertEqual(first=self.vehicle.get_rc_channel(6), second=1000, msg="RC channel 6 is not set to 1000")
+        self.assertTrue(expr=self.vehicle.wait_rc_channel(channel=6, value=1000), msg="RC channel 6 is not set to 1000")
 
         self.vehicle.set_rc_channels(channels_and_values={6: 2000, 7: 1800, 8: 1200})
-        time.sleep(2)
-        self.assertEqual(first=self.vehicle.get_rc_channel(6), second=2000, msg="RC channel 6 is not set to 2000")
-        self.assertEqual(first=self.vehicle.get_rc_channel(7), second=1800, msg="RC channel 7 is not set to 1800")
-        self.assertEqual(first=self.vehicle.get_rc_channel(8), second=1200, msg="RC channel 8 is not set to 1200")
+        self.assertTrue(expr=self.vehicle.wait_rc_channel(channel=6, value=2000), msg="RC channel 6 is not set to 2000")
+        self.assertTrue(expr=self.vehicle.wait_rc_channel(channel=7, value=1800), msg="RC channel 7 is not set to 1800")
+        self.assertTrue(expr=self.vehicle.wait_rc_channel(channel=8, value=1200), msg="RC channel 8 is not set to 1200")

@@ -1,5 +1,5 @@
-import time
 import unittest
+
 import pymavclient
 
 
@@ -14,17 +14,13 @@ class TestArm(unittest.TestCase):
         self.simulation.close()
 
     def test_init(self):
-        self.assertTrue(expr=self.vehicle.disarmed, msg="Vehicle is not disarmed")
+        self.assertTrue(expr=self.vehicle.wait_disarmed(), msg="Vehicle is not disarmed")
 
     def test_arm(self):
         self.vehicle.arm()
-        time.sleep(2)
-        self.assertTrue(expr=self.vehicle.armed, msg="Vehicle is failed to arm")
+        self.assertTrue(expr=self.vehicle.wait_armed(), msg="Vehicle is failed to arm")
 
     def test_disarm(self):
-        self.vehicle.arm()
-        time.sleep(2)
-
+        self.test_arm()
         self.vehicle.disarm()
-        time.sleep(2)
-        self.assertTrue(expr=self.vehicle.disarmed, msg="Vehicle is failed to disarm")
+        self.assertTrue(expr=self.vehicle.wait_disarmed(), msg="Vehicle is failed to disarm")
