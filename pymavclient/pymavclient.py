@@ -81,6 +81,7 @@ class PyMAVClient:
                             continue
                         self.__last_message_time = time.monotonic()
                         message_dict = message.to_dict()
+                        message_dict["monotonic"] = self.__last_message_time
                         self.__messages[message.msgname] = message_dict
                         if message.msgname == "PARAM_VALUE":
                             self.__parameters[message.param_id] = message_dict
@@ -210,10 +211,12 @@ class PyMAVClient:
             if self.__wait_parameters(timeout=__timeout, request_before=request_before, request_after=request_after):
                 return True
 
-    def wait_armable(self, timeout=30):
+    def wait_armable(self, timeout=30, wait_before=0):
         """
         Wait for the vehicle to be able to arm.
         """
+        if wait_before > 0:
+            time.sleep(wait_before)
         start_time = time.monotonic()
         while True:
             if time.monotonic() - start_time > timeout > 0:
@@ -438,6 +441,37 @@ class PyMAVClient:
                                                                    *temp_channels)
             self.__vehicle.mav.send(message)
 
+    def takeoff(self, altitude=10):
+        """
+        Takeoff the vehicle.
+        """
+        if self.wait_connected():
+            self.send_command_long(command=dialect.MAV_CMD_NAV_TAKEOFF,
+                                   param7=altitude)
+
+    def land(self):
+        """
+        Land the vehicle.
+        """
+        if self.wait_connected():
+            self.send_command_long(command=dialect.MAV_CMD_NAV_LAND)
+
+    def wait_altitude(self, altitude, timeout=10, absolute=False, precision=1.0):
+        """
+        Wait for the vehicle to reach an altitude.
+        """
+        start_time = time.monotonic()
+        while True:
+            if time.monotonic() - start_time > timeout > 0:
+                return False
+            if absolute:
+                if abs(self.absolute_altitude - altitude) <= precision:
+                    return True
+            else:
+                if abs(self.relative_altitude - altitude) <= precision:
+                    return True
+            time.sleep(0.1)
+
     @property
     def connected(self):
         """
@@ -493,9 +527,9 @@ class PyMAVClient:
         if not self.__connected:
             return None
         sys_status = self.__messages.get("SYS_STATUS", {})
-        onboard_control_sensors_health = sys_status.get("onboard_control_sensors_health", -1)
-        if sys_status == {} or onboard_control_sensors_health == -1:
+        if sys_status == {}:
             return None
+        onboard_control_sensors_health = sys_status["onboard_control_sensors_health"]
         pre_arm_status_bit = onboard_control_sensors_health & dialect.MAV_SYS_STATUS_PREARM_CHECK
         pre_arm_status = pre_arm_status_bit == dialect.MAV_SYS_STATUS_PREARM_CHECK
         return pre_arm_status
