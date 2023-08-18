@@ -14,10 +14,13 @@ class TestArm(unittest.TestCase):
         self.simulation.close()
 
     def test_arm(self):
-        self.assertTrue(expr=self.vehicle.wait_disarmed(), msg="Vehicle is not disarmed")
+        self.assertTrue(expr=self.vehicle.wait_disarmed(timeout=10),
+                        msg="Vehicle is not disarmed")
 
         self.vehicle.arm()
-        self.assertTrue(expr=self.vehicle.wait_armed(), msg="Vehicle is failed to arm")
+        self.assertTrue(expr=self.vehicle.wait_armed(timeout=10),
+                        msg="Vehicle is failed to arm")
 
         self.vehicle.disarm()
-        self.assertTrue(expr=self.vehicle.wait_disarmed(), msg="Vehicle is failed to disarm")
+        self.assertTrue(expr=self.vehicle.wait_disarmed(timeout=10),
+                        msg="Vehicle is failed to disarm")

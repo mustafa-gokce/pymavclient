@@ -456,6 +456,15 @@ class PyMAVClient:
         if self.wait_connected():
             self.send_command_long(command=dialect.MAV_CMD_NAV_LAND)
 
+    def reached_altitude(self, altitude, absolute=False, precision=1.0):
+        if absolute:
+            if abs(self.absolute_altitude - altitude) <= precision:
+                return True
+        else:
+            if abs(self.relative_altitude - altitude) <= precision:
+                return True
+        return False
+
     def wait_altitude(self, altitude, timeout=10, absolute=False, precision=1.0):
         """
         Wait for the vehicle to reach an altitude.
@@ -464,12 +473,62 @@ class PyMAVClient:
         while True:
             if time.monotonic() - start_time > timeout > 0:
                 return False
+            if self.reached_altitude(altitude=altitude, absolute=absolute, precision=precision):
+                return True
+            time.sleep(0.1)
+
+    def fly_to(self, latitude, longitude, altitude, absolute=False):
+        """
+        Fly to a position.
+        """
+        if self.wait_connected():
+            message = dialect.MAVLink_mission_item_int_message(target_system=self.__vehicle.target_system,
+                                                               target_component=self.__vehicle.target_component,
+                                                               seq=0,
+                                                               frame=dialect.MAV_FRAME_GLOBAL_RELATIVE_ALT_INT,
+                                                               command=dialect.MAV_CMD_NAV_WAYPOINT,
+                                                               current=2,
+                                                               autocontinue=0,
+                                                               param1=0,
+                                                               param2=0,
+                                                               param3=0,
+                                                               param4=0,
+                                                               x=int(latitude * 1e7),
+                                                               y=int(longitude * 1e7),
+                                                               z=altitude)
             if absolute:
-                if abs(self.absolute_altitude - altitude) <= precision:
-                    return True
-            else:
-                if abs(self.relative_altitude - altitude) <= precision:
-                    return True
+                message.frame = dialect.MAV_FRAME_GLOBAL_INT
+            self.__vehicle.mav.send(message)
+
+    def reached_location(self, latitude, longitude, precision=1.0):
+        """
+        Check if vehicle is at the location.
+        """
+        return geopy.distance.distance((self.latitude, self.longitude), (latitude, longitude)).meters <= precision
+
+    def wait_location_2d(self, latitude, longitude, timeout=10, precision=1.0):
+        """
+        Wait for the vehicle to reach a 2D location.
+        """
+        start_time = time.monotonic()
+        while True:
+            if time.monotonic() - start_time > timeout > 0:
+                return False
+            if self.reached_location(latitude=latitude, longitude=longitude, precision=precision):
+                return True
+            time.sleep(0.1)
+
+    def wait_location_3d(self, latitude, longitude, altitude, absolute=False, timeout=10, precision=1.0):
+        """
+        Wait for the vehicle to reach a 3D location.
+        """
+        start_time = time.monotonic()
+        while True:
+            if time.monotonic() - start_time > timeout > 0:
+                return False
+            if self.reached_location(latitude=latitude, longitude=longitude, precision=precision) and \
+                    self.reached_altitude(altitude=altitude, absolute=absolute, precision=precision):
+                return True
             time.sleep(0.1)
 
     @property

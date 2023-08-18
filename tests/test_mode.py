@@ -14,10 +14,13 @@ class TestMode(unittest.TestCase):
         self.simulation.close()
 
     def test_mode(self):
-        self.assertTrue(expr=self.vehicle.wait_mode(mode="STABILIZE"), msg="Vehicle mode is not to STABILIZE")
+        self.assertTrue(expr=self.vehicle.wait_mode(mode="STABILIZE", timeout=10),
+                        msg="Vehicle mode is not to STABILIZE")
 
         self.vehicle.change_mode(mode="GUIDED")
-        self.assertTrue(expr=self.vehicle.wait_mode(mode="GUIDED"), msg="Vehicle failed to change mode to GUIDED")
+        self.assertTrue(expr=self.vehicle.wait_mode(mode="GUIDED", timeout=10),
+                        msg="Vehicle failed to change mode to GUIDED")
 
         self.vehicle.change_mode(mode="STABILIZE")
-        self.assertTrue(expr=self.vehicle.wait_mode(mode="STABILIZE"), msg="Vehicle failed to change mode to STABILIZE")
+        self.assertTrue(expr=self.vehicle.wait_mode(mode="STABILIZE", timeout=10),
+                        msg="Vehicle failed to change mode to STABILIZE")
