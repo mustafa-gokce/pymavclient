@@ -211,18 +211,22 @@ class PyMAVClient:
             if self.__wait_parameters(timeout=__timeout, request_before=request_before, request_after=request_after):
                 return True
 
-    def wait_armable(self, timeout=30, wait_before=0):
+    def wait_armable(self, timeout=30, steady_time=5):
         """
         Wait for the vehicle to be able to arm.
         """
-        if wait_before > 0:
-            time.sleep(wait_before)
-        start_time = time.monotonic()
+        if not timeout > steady_time > 0:
+            return False
+        end_time = time.monotonic() + timeout - steady_time
+        if not self.wait_connected(timeout=timeout):
+            return False
         while True:
-            if time.monotonic() - start_time > timeout > 0:
+            if time.monotonic() > end_time:
                 return False
             if self.armable:
-                return True
+                time.sleep(steady_time)
+                if self.armable:
+                    return True
             time.sleep(0.1)
 
     def send_request_parameter_list(self):

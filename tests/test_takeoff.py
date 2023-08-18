@@ -18,7 +18,7 @@ class TestTakeoff(unittest.TestCase):
         self.assertTrue(expr=self.vehicle.wait_mode(mode="GUIDED", timeout=10),
                         msg="Vehicle failed to change mode to GUIDED")
 
-        self.assertTrue(expr=self.vehicle.wait_armable(timeout=30, wait_before=5),
+        self.assertTrue(expr=self.vehicle.wait_armable(timeout=30),
                         msg="Vehicle is failed to be armable")
 
         self.vehicle.arm()

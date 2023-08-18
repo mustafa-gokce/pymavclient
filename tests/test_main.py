@@ -27,7 +27,7 @@ class TestMain(unittest.TestCase):
                         msg="Timed out waiting for ready")
 
     def test_vehicle_wait_armable(self):
-        self.assertTrue(expr=self.vehicle.wait_armable(timeout=30, wait_before=0),
+        self.assertTrue(expr=self.vehicle.wait_armable(timeout=30),
                         msg="Timed out waiting for vehicle to be armable")
 
     def test_vehicle_mode(self):
