@@ -173,14 +173,12 @@ class PyMAVClient:
                 return True
             time.sleep(0.1)
 
-    def __wait_parameters(self, timeout=10, request_before=True, request_after=True):
+    def wait_parameters(self, timeout=60, request_before=True, request_after=True):
         """
         Wait for the vehicle to receive parameters.
         """
         start_time = time.monotonic()
         self.wait_connected()
-        if request_before:
-            self.send_request_parameter_list()
         while True:
             if time.monotonic() - start_time > timeout > 0:
                 break
@@ -189,6 +187,9 @@ class PyMAVClient:
                 remote_parameter_list_length = self.__messages.get("PARAM_VALUE", {}).get("param_count", 0)
                 if local_parameter_list_length >= remote_parameter_list_length:
                     return True
+                elif request_before:
+                    self.send_request_parameter_list()
+                    request_before = False
             time.sleep(0.1)
         if request_after:
             remote_parameter_list_length = self.__messages.get("PARAM_VALUE", {}).get("param_count", 0)
@@ -197,19 +198,6 @@ class PyMAVClient:
                 if parameter_index not in local_parameter_indexes:
                     self.send_request_parameter(parameter_index=parameter_index)
         return False
-
-    def wait_parameters(self, timeout=30, request_before=True, request_after=True):
-        """
-        Wait for the vehicle to receive parameters.
-        """
-        start_time = time.monotonic()
-        __timeout = int(timeout / 3)
-        self.wait_connected()
-        while True:
-            if time.monotonic() - start_time > timeout > 0:
-                return False
-            if self.__wait_parameters(timeout=__timeout, request_before=request_before, request_after=request_after):
-                return True
 
     def wait_armable(self, timeout=30, steady_time=5):
         """

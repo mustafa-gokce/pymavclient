@@ -3,6 +3,7 @@ import requests
 import subprocess
 import tempfile
 import platform
+import time
 
 
 class PyMAVSim:
@@ -50,6 +51,9 @@ class PyMAVSim:
                 cwd=self.__path,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT)
+        time.sleep(5)
+        if self.__process.poll() is not None:
+            raise Exception("PyMAVSim failed to start")
 
     def start(self):
         if self.__vehicle == "copter":
