@@ -13,7 +13,7 @@ class TestRC(unittest.TestCase):
         self.vehicle.close()
         self.simulation.close()
 
-    def test_init(self):
+    def test_rc(self):
         self.assertEqual(first=self.vehicle.get_rc_channel(1), second=1500,
                          msg="RC channel 1 (roll) is not 1000")
         self.assertEqual(first=self.vehicle.get_rc_channel(2), second=1500,
@@ -23,7 +23,6 @@ class TestRC(unittest.TestCase):
         self.assertEqual(first=self.vehicle.get_rc_channel(4), second=1500,
                          msg="RC channel 4 (yaw) is not 1000")
 
-    def test_rc(self):
         self.vehicle.set_rc_channel(channel=6, value=2000)
         self.assertTrue(expr=self.vehicle.wait_rc_channel(channel=6, value=2000, timeout=10),
                         msg="RC channel 6 is not set to 2000")
