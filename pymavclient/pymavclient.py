@@ -523,6 +523,35 @@ class PyMAVClient:
                 return True
             time.sleep(0.1)
 
+    def set_parameter(self, name, value):
+        """
+        Set a parameter.
+        """
+        if self.wait_connected():
+            message = dialect.MAVLink_param_set_message(target_system=self.__vehicle.target_system,
+                                                        target_component=self.__vehicle.target_component,
+                                                        param_id=name.encode("utf-8"),
+                                                        param_value=value,
+                                                        param_type=dialect.MAV_PARAM_TYPE_REAL32)
+            self.__vehicle.mav.send(message)
+
+    def wait_parameter(self, name, value, timeout=10, precision=None):
+        """
+        Wait for a parameter to change value.
+        """
+        start_time = time.monotonic()
+        while True:
+            if time.monotonic() - start_time > timeout > 0:
+                return False
+            if name in self.__parameters:
+                if precision is None:
+                    if self.__parameters[name]["param_value"] == value:
+                        return True
+                else:
+                    if abs(self.__parameters[name]["param_value"] - value) <= precision:
+                        return True
+            time.sleep(0.1)
+
     @property
     def connected(self):
         """
